@@ -10,6 +10,7 @@ var exports = {
   $duvr: $duvr,
   $dum: $dum,
   $duml: $duml,
+  $dume: $dume,
   $dumr: $dumr,
   $dug: $dug,
   $dugl: $dugl,
@@ -161,15 +162,17 @@ function $duvr(object, event) {
 var wrappedMethods = [];
 
 /**
- * Wraps a method with a debugger or logger statement.
+ * Wraps a method with a custom callback.
  *
  * @param {object} object
  * @param {string} methodName
- * @param {boolean} isLog
+ * @param {boolean} log
+ * @param {boolean} debug
+ * @param {function} callback
  * @private
  */
 
-function wrapMethod(object, methodName, isLog) {
+function wrapMethod(object, methodName, log, debug, callback) {
   assert(
     typeof object === 'object' &&
       object && typeof object[methodName] === 'function',
@@ -186,17 +189,20 @@ function wrapMethod(object, methodName, isLog) {
   var slice = [].slice;
   var replacement;
 
-  if (isLog) {
-    replacement = function() {
-      console.log(arguments);
-      return method.apply(this, slice.call(arguments));
-    };
-  } else {
-    replacement = function() {
+  replacement = function() {
+    if (typeof callback === 'function') {
+      callback.apply(this, arguments);
+    }
+    if (log) {
+      var copyArgs = slice.call(arguments);
+      copyArgs.unshift(methodName);
+      console.log.apply(console, copyArgs);
+    }
+    if (debug) {
       debugger;
-      return method.apply(this, slice.call(arguments));
-    };
-  }
+    }
+    return method.apply(this, slice.call(arguments));
+  };
 
   object[methodName] = replacement;
 }
@@ -210,7 +216,7 @@ function wrapMethod(object, methodName, isLog) {
  */
 
 function $dum(object, method) {
-  wrapMethod(object, method);
+  wrapMethod(object, method, false, true);
 }
 
 /**
@@ -222,9 +228,21 @@ function $dum(object, method) {
  */
 
 function $duml(object, method) {
-  wrapMethod(object, method, true);
+  wrapMethod(object, method, true, false);
 }
 
+/**
+ * Wraps a method with a custom callback.
+ *
+ * @param {object} object
+ * @param {string} methodName
+ * @param {callback} callback
+ * @public
+ */
+
+function $dume(object, method, callback) {
+  wrapMethod(object, method, false, false, callback);
+}
 /**
  * Removes method wrapping.
  *

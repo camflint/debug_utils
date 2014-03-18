@@ -74,7 +74,7 @@ describe('$duv, $duvl, $duvr', function() {
 
 });
 
-describe('$dum, $duml, $dumr', function() {
+describe('$dum, $duml, $dume, $dumr', function() {
 
   beforeEach(function() {
     this.obj = {
@@ -95,6 +95,18 @@ describe('$dum, $duml, $dumr', function() {
     du.$duml(this.obj, 'foo');
     assert(this.obj.foo.toString().match(/console.log/));
     assert.equal(this.obj.foo(1, 2, 3), 6);
+  });
+
+  it('should call custom callback', function() {
+    var called = false;
+
+    du.$dume(this.obj, 'foo', function() {
+      called = true;
+    });
+
+    this.obj.foo(1, 2, 3);
+
+    assert.ok(called);
   });
 
   it('should removed wrapped method', function() {

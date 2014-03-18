@@ -150,6 +150,10 @@ Useful for:
 
 Like `$dum` but logs arguments instead.
 
+### $dume(object, method, callback)
+
+Executes `callback` when the method is invoked.
+
 ### $dumr(object, method)
 
 Removes debug or log wrappers added by `$dum` or `$duml`.
